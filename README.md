@@ -1,2 +1,2 @@
 # PWN
-Some scripts i used to solve some pwn challenges in CTFs or in learning platforms like root-me, hackthebox...etc
+Some pwn challenges i solved during CTFs i played or in learning platforms like Hackthebox, root-me, picoCTF...etc
