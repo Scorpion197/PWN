@@ -4,14 +4,15 @@
 
 void disable_buffering();
 
-void main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
 
     disable_buffering();
 
-    printf("Welcome to messy malloc \n");
     size_t size; 
-    void *pointer; 
+    void *pointer;
 
+    printf("Welcome to messy malloc \n");
+     
     printf("How much: "); 
     scanf("%ld", &size);
 
@@ -24,7 +25,9 @@ void main(int argc, char *argv[]) {
     printf("Content: ");
     scanf("%zu",pointer + (size *8));
 
-    exit(0);
+    printf("See ya ^^ \n");
+
+    return 0;
 
 }
 
