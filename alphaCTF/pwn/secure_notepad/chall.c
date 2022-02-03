@@ -203,15 +203,17 @@ void add_note() {
     memset(temp_buffer, 0, 48);
 
     puts("Add note: ");
-    fgets(note_buffer, NOTE_SIZE - 1, stdin);
-    getc(stdin);
+    fflush(stdin);
+
+    scanf("%100s", note_buffer);
 
     for (int i = 0; i < strlen(note_buffer); i++)
         note_buffer[i] = note_buffer[i] ^ XOR_KEY;
 
     strcpy(temp_buffer, note_buffer);
-    
     printf(note_buffer);
+    
+    fflush(stdin);
 
 }
 
