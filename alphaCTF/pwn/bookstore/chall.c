@@ -173,14 +173,7 @@ void remove_book() {
         return; 
     }
 
-    if (entries[index] == 0) {
-
-        printf("Nope book already deleted!\n");
-        return;
-    }
-
     free(entries[index]);
-    entries[index] = 0;
     printf("Book removed!\n");
     created_entries--;
 
